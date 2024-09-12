@@ -1,0 +1,33 @@
+version: '3.0'
+services:
+  database:
+    container_name: database-container
+    image: 'mysql:8.2.0'
+    ports:
+      - '3306:3306'
+    volumes:
+      - 'mysql-data:/var/lib/mysql'
+    env_file: .env
+    networks:
+      - app_network
+
+  backend:
+    container_name: back-container
+    depends_on:
+      - database
+    build:
+      context: ./
+      dockerfile: ./Dockerfile.dev
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    ports:
+      - '3000:3000'
+    networks:
+      - app_network
+
+volumes:
+  mysql-data:
+
+networks:
+  app_network:
