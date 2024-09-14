@@ -3,12 +3,12 @@ import { AuthService } from './auth.service';
 import { Auth } from './auth.interface';
 import { User } from 'src/users/user.model';
 import { Response } from 'express';
-import { LoginState } from '../enums/login.enum';
-import { UserInfo } from '../users/user-info.interface';
+import { LoginState } from '../enums/login-state.enum';
+import { Token } from '../interfaces/token.interface';
+import { RegisterState } from 'src/enums/register-state.enum';
 
 @Controller('/auth')
 export class AuthController {
-  private responseMessage: any;
   private statusToReturn: number;
 
   constructor(private authService: AuthService) {}
@@ -19,18 +19,11 @@ export class AuthController {
     @Body() auth: Auth,
     @Res() response: Response,
   ): Promise<Response> {
-    const loggedIn: UserInfo | LoginState = await this.authService.login(auth);
+    const loginState: Token | LoginState = await this.authService.login(auth);
     this.statusToReturn = 200;
-    if (loggedIn instanceof UserInfo) {
-      this.responseMessage = loggedIn;
-    } else if (loggedIn == LoginState.NotFound) {
-      this.statusToReturn = 404;
-      this.responseMessage = LoginState.NotFound;
-    } else {
-      this.responseMessage = LoginState.WrongMatch;
-    }
+    if (!(loginState instanceof Token)) this.statusToReturn = 404;
     return response.status(this.statusToReturn).send({
-      response: this.responseMessage,
+      response: loginState,
       status: this.statusToReturn,
     });
   }
@@ -41,11 +34,12 @@ export class AuthController {
     @Body() user: User,
     @Res() response: Response,
   ): Promise<Response> {
-    const createdUser: User | string = await this.authService.register(user);
+    const registerState: Token | RegisterState =
+      await this.authService.register(user);
     this.statusToReturn = 201;
-    if (!(createdUser instanceof User)) this.statusToReturn = 409;
+    if (!(registerState instanceof Token)) this.statusToReturn = 409;
     return response.status(this.statusToReturn).send({
-      response: createdUser,
+      response: registerState,
       status: this.statusToReturn,
     });
   }

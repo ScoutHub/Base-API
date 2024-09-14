@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { User } from './user.model';
 import { InjectModel } from '@nestjs/sequelize';
 import * as bcrypt from 'bcrypt';
+import { RegisterState } from '../enums/register-state.enum';
 
 @Injectable()
 export class UserService {
@@ -39,15 +40,15 @@ export class UserService {
     });
   }
 
-  async new(user: User): Promise<User | string> {
+  async new(user: User): Promise<User | RegisterState> {
     if (await this.findOneByEmail(user.email)) {
-      return 'Email already exist';
+      return RegisterState.EmailExist;
     }
     if (await this.findOneByPseudo(user.pseudo)) {
-      return 'Pseudo already exist';
+      return RegisterState.PseudoExist;
     }
     if (user.password.length < 8) {
-      return 'Password length must be > 8';
+      return RegisterState.WrongPasswordLength;
     }
     const hashedPass = await bcrypt.hash(user.password, this.saltOrRounds);
     const userCreated = await this.userModel.create({

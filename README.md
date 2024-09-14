@@ -3,6 +3,7 @@
 ```bash
 $ npm install
 ```
+
 ## Env setup
 
 ```
@@ -14,10 +15,10 @@ DB_HOST=
 JWT_SECRET=
 ```
 
-
-
 ## Compile and run the project locally
+
 ### If you want to use the api locally, you need to setup a database like MySQL or MariaDB
+
 ```bash
 # development
 $ npm run start
@@ -25,10 +26,13 @@ $ npm run start
 # watch mode
 $ npm run start:dev
 ```
+
 ## Compile and run the project with docker
+
 ```
 $ docker-compose -f compose.dev.yml up -d --build
 ```
+
 ## Run tests
 
 ```bash
