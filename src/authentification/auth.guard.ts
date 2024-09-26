@@ -30,7 +30,6 @@ export class AuthGuard implements CanActivate {
           throw new UnauthorizedException();
       }
     } catch {
-      // TODO: refresh token
       throw new UnauthorizedException();
     }
     return true;

@@ -1,18 +1,21 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { Auth } from './auth.interface';
 import { User } from 'src/users/user.model';
 import { UserService } from '../users/user.service';
-import { LoginState } from '../enums/login-state.enum';
+import { LoginState } from './enums/login-state.enum';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { Token } from '../interfaces/token.interface';
-import { RegisterState } from '../enums/register-state.enum';
+import { Token } from './interfaces/token.interface';
+import { RegisterState } from './enums/register-state.enum';
+import { RefreshTokenService } from './services/refresh-token.service';
 
 @Injectable()
 export class AuthService {
+  private readonly jwtSecret = process.env.JWT_SECRET;
   constructor(
     private userService: UserService,
     private jwtService: JwtService,
+    private refreshTokenService: RefreshTokenService,
   ) {}
 
   async login(auth: Auth): Promise<Token | LoginState> {
@@ -35,9 +38,25 @@ export class AuthService {
     return registerState;
   }
 
+  async generateNewAccessToken(token: string): Promise<Token | string> {
+    const payload = await this.refreshTokenService.verifyRefreshToken(token);
+
+    try {
+      const user: User = await this.userService.findOneById(payload.userId);
+      const newToken: Token = await this.generateToken(user);
+      return newToken;
+    } catch (e) {
+      throw new UnauthorizedException('Invalid refresh token', e);
+    }
+  }
+
   private async generateToken(user: User): Promise<Token> {
     const payload = { userId: user.id, email: user.email };
     const access_token: string = await this.jwtService.signAsync(payload);
-    return new Token(access_token, user.email, user.id);
+    const refresh_token: string =
+      await this.refreshTokenService.generateRefreshToken(payload);
+    user.refresh_token = refresh_token;
+    user.save();
+    return new Token(access_token, refresh_token, user.email, user.id);
   }
 }

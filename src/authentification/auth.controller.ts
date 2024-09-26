@@ -1,11 +1,20 @@
-import { Body, Controller, Header, Post, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Header,
+  HttpCode,
+  Post,
+  Req,
+  Res,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Auth } from './auth.interface';
 import { User } from 'src/users/user.model';
 import { Response } from 'express';
-import { LoginState } from '../enums/login-state.enum';
-import { Token } from '../interfaces/token.interface';
-import { RegisterState } from 'src/enums/register-state.enum';
+import { LoginState } from './enums/login-state.enum';
+import { Token } from './interfaces/token.interface';
+import { RegisterState } from 'src/authentification/enums/register-state.enum';
 
 @Controller('/auth')
 export class AuthController {
@@ -22,10 +31,7 @@ export class AuthController {
     const loginState: Token | LoginState = await this.authService.login(auth);
     this.statusToReturn = 200;
     if (!(loginState instanceof Token)) this.statusToReturn = 404;
-    return response.status(this.statusToReturn).send({
-      response: loginState,
-      status: this.statusToReturn,
-    });
+    return response.status(this.statusToReturn).send(loginState);
   }
 
   @Post('/register')
@@ -38,9 +44,16 @@ export class AuthController {
       await this.authService.register(user);
     this.statusToReturn = 201;
     if (!(registerState instanceof Token)) this.statusToReturn = 409;
-    return response.status(this.statusToReturn).send({
-      response: registerState,
-      status: this.statusToReturn,
-    });
+    return response.status(this.statusToReturn).send(registerState);
+  }
+
+  @Get('/token/refresh')
+  @HttpCode(200)
+  async test(@Req() request, @Res() response: Response): Promise<Response> {
+    const refresh_token = request.headers['x-refresh-token'] ?? '';
+
+    const newToken =
+      await this.authService.generateNewAccessToken(refresh_token);
+    return response.send(newToken);
   }
 }

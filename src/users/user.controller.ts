@@ -26,8 +26,7 @@ export class UserController {
     const users: Array<User> = await this.userService.findAll();
     this.statusToReturn = 200;
     return response.status(this.statusToReturn).send({
-      response: users,
-      status: 200,
+      users,
     });
   }
 
@@ -44,10 +43,7 @@ export class UserController {
       this.statusToReturn = 200;
       this.responseMessage = user;
     }
-    return response.status(this.statusToReturn).send({
-      response: this.responseMessage,
-      status: this.statusToReturn,
-    });
+    return response.status(this.statusToReturn).send(this.responseMessage);
   }
 
   @Delete(':id')
@@ -62,9 +58,8 @@ export class UserController {
       this.statusToReturn = 200;
       this.responseMessage = 'User successfully deleted';
     }
-    return response.status(this.statusToReturn).send({
-      response: this.responseMessage,
-      status: this.statusToReturn,
-    });
+    return response
+      .status(this.statusToReturn)
+      .send({ message: this.responseMessage });
   }
 }

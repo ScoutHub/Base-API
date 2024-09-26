@@ -2,18 +2,21 @@ import { Injectable } from '@nestjs/common';
 import { User } from './user.model';
 import { InjectModel } from '@nestjs/sequelize';
 import * as bcrypt from 'bcrypt';
-import { RegisterState } from '../enums/register-state.enum';
+import { RegisterState } from '../authentification/enums/register-state.enum';
 
 @Injectable()
 export class UserService {
   private readonly saltOrRounds: number = 10;
+
   constructor(
     @InjectModel(User)
     private userModel: typeof User,
   ) {}
 
   async findAll(): Promise<User[]> {
-    return this.userModel.findAll();
+    return this.userModel.findAll({
+      attributes: { exclude: ['password', 'refresh_token'] },
+    });
   }
 
   findOneById(id: string): Promise<User> {
@@ -21,6 +24,7 @@ export class UserService {
       where: {
         id,
       },
+      attributes: { exclude: ['password', 'refresh_token'] },
     });
   }
 
@@ -28,6 +32,14 @@ export class UserService {
     return this.userModel.findOne({
       where: {
         email,
+      },
+    });
+  }
+
+  findOneByToken(refresh_token: string): Promise<User> {
+    return this.userModel.findOne({
+      where: {
+        refresh_token,
       },
     });
   }
