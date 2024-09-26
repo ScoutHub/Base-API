@@ -8,6 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Token } from './interfaces/token.interface';
 import { RegisterState } from './enums/register-state.enum';
 import { RefreshTokenService } from './services/refresh-token.service';
+import { CreateUserDto } from 'src/users/dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -29,9 +30,9 @@ export class AuthService {
     return LoginState.NotFound;
   }
 
-  async register(user: User): Promise<Token | RegisterState> {
+  async register(createUserDto: CreateUserDto): Promise<Token | RegisterState> {
     const registerState: User | RegisterState =
-      await this.userService.new(user);
+      await this.userService.new(createUserDto);
     if (registerState instanceof User) {
       return await this.generateToken(registerState);
     }
@@ -55,7 +56,6 @@ export class AuthService {
     const access_token: string = await this.jwtService.signAsync(payload);
     const refresh_token: string =
       await this.refreshTokenService.generateRefreshToken(payload);
-    user.refresh_token = refresh_token;
     user.save();
     return new Token(access_token, refresh_token, user.email, user.id);
   }

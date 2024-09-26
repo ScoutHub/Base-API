@@ -20,20 +20,17 @@ export class User extends Model {
   id: string;
 
   @Column
-  firstname: string;
+  firstName: string;
 
   @Column
-  lastname: string;
+  lastName: string;
 
   @Column
   email: string;
 
   @Column
-  pseudo: string;
+  username: string;
 
   @Column
   password: string;
-
-  @Column
-  refresh_token: string;
 }

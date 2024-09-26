@@ -3,6 +3,7 @@ import { User } from './user.model';
 import { InjectModel } from '@nestjs/sequelize';
 import * as bcrypt from 'bcrypt';
 import { RegisterState } from '../authentification/enums/register-state.enum';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
 export class UserService {
@@ -36,39 +37,31 @@ export class UserService {
     });
   }
 
-  findOneByToken(refresh_token: string): Promise<User> {
+  findOneByUsername(username: string): Promise<User> {
     return this.userModel.findOne({
       where: {
-        refresh_token,
+        username,
       },
     });
   }
 
-  findOneByPseudo(pseudo: string): Promise<User> {
-    return this.userModel.findOne({
-      where: {
-        pseudo,
-      },
-    });
-  }
-
-  async new(user: User): Promise<User | RegisterState> {
-    if (await this.findOneByEmail(user.email)) {
+  async new(userData: CreateUserDto): Promise<User | RegisterState> {
+    if (await this.findOneByEmail(userData.email)) {
       return RegisterState.EmailExist;
     }
-    if (await this.findOneByPseudo(user.pseudo)) {
-      return RegisterState.PseudoExist;
+    if (await this.findOneByUsername(userData.username)) {
+      return RegisterState.UsernameExist;
     }
-    if (user.password.length < 8) {
+    if (userData.password.length < 8) {
       return RegisterState.WrongPasswordLength;
     }
-    const hashedPass = await bcrypt.hash(user.password, this.saltOrRounds);
+    const hashedPass = await bcrypt.hash(userData.password, this.saltOrRounds);
     const userCreated = await this.userModel.create({
-      firstname: user.firstname,
-      lastname: user.lastname,
-      email: user.email,
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      email: userData.email,
       password: hashedPass,
-      pseudo: user.pseudo,
+      username: userData.username,
     });
     return userCreated;
   }
