@@ -13,6 +13,7 @@ MYSQL_PASSWORD=
 MYSQL_ROOT_PASSWORD=
 DB_HOST=
 JWT_SECRET=
+JWT_REFRESH_TOKEN=
 ```
 
 ## Compile and run the project locally
