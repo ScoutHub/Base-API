@@ -1,4 +1,5 @@
 import {
+  IsEmail,
   IsString,
   IsStrongPassword,
   MaxLength,
@@ -33,6 +34,7 @@ export class CreateUserDto {
   password: string;
 
   @IsString()
+  @IsEmail()
   @MinLength(10)
   @MaxLength(100)
   email: string;
