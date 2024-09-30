@@ -11,7 +11,6 @@ import {
 import { AuthService } from './auth.service';
 import { Auth } from './auth.interface';
 import { Response, Request } from 'express';
-import { LoginState } from './enums/login-state.enum';
 import { Token } from './interfaces/token.interface';
 import { RegisterState } from 'src/authentification/enums/register-state.enum';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
@@ -28,7 +27,7 @@ export class AuthController {
     @Body() auth: Auth,
     @Res() response: Response,
   ): Promise<Response> {
-    const loginState: Token | LoginState = await this.authService.login(auth);
+    const loginState: Token | string = await this.authService.login(auth);
     this.statusToReturn = 200;
     if (!(loginState instanceof Token)) this.statusToReturn = 404;
     return response.status(this.statusToReturn).send(loginState);
