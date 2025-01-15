@@ -1,0 +1,5 @@
+export enum UserValidationStatus {
+  EmailExist = 'Email already exist',
+  UsernameExist = 'Username already exist',
+  WrongPasswordLength = 'Password length must be > 8',
+}
