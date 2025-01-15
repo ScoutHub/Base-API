@@ -1,0 +1,38 @@
+services:
+  database:
+    container_name: database-container-prod
+    image: 'postgres:17'
+    volumes:
+      - 'db-data:/var/lib/postgresql/data/'
+    env_file: .env
+    networks:
+      - app_network
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    container_name: back-container-prod
+    depends_on:
+      database:
+        condition: service_healthy
+    build:
+      context: ./
+      dockerfile: ./Dockerfile.prod
+    ports:
+      - '3000:3000'
+    env_file: .env
+    networks:
+      - app_network
+    restart: always
+
+volumes:
+  db-data:
+    driver: local
+
+networks:
+  app_network:
+    driver: bridge

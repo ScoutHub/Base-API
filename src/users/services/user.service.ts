@@ -17,7 +17,7 @@ export class UserService {
 
   async findAll(): Promise<User[]> {
     return this.userModel.findAll({
-      attributes: { exclude: ['password', 'refresh_token'] },
+      attributes: { exclude: ['password'] },
     });
   }
 
@@ -26,7 +26,7 @@ export class UserService {
       where: {
         id,
       },
-      attributes: { exclude: ['password', 'refresh_token'] },
+      attributes: { exclude: ['password'] },
     });
   }
 
